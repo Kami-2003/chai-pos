@@ -280,9 +280,10 @@ h3 { margin: 22px 0 8px; font-size: 16px; }
     repeating-conic-gradient(rgba(255,215,80,.55) 0 8deg, transparent 8deg 20deg);
   animation: halo 3s linear infinite;
 }
-.rg-body { font-size: 130px; line-height: 1; filter: drop-shadow(0 0 18px #ffd54a); animation: float 1s ease-in-out infinite alternate; }
-.rg-crown { font-size: 54px; align-self: start; margin-top: 4px; animation: float 1s ease-in-out infinite alternate; }
-.rg-lotus { font-size: 56px; align-self: end; }
+.rg-body { line-height: 0; filter: drop-shadow(0 0 14px rgba(255,213,74,.9)); animation: float 1s ease-in-out infinite alternate; }
+.rg-body svg { display: block; }
+/* 上の2本の腕をゆらゆら */
+.rg-body svg { overflow: visible; }
 @keyframes halo { to { transform: rotate(360deg); } }
 @keyframes float { to { transform: translateY(-10px); } }
 @keyframes ganesha-fly {

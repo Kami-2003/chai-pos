@@ -165,10 +165,116 @@ const FX = (() => {
     setTimeout(() => { clearInterval(dust); h.remove(); }, 2300);
   }
 
+  // ピンク色・4本腕・蓮の上に座るガネーシャ
+  const GANESHA_SVG = `
+<svg viewBox="0 0 240 270" width="230" height="259" xmlns="http://www.w3.org/2000/svg" aria-label="ガネーシャ">
+  <g stroke="#c9578a" stroke-width="2" stroke-linejoin="round">
+    <!-- 蓮の台座 -->
+    <g fill="#ff9cc4">
+      <ellipse cx="70" cy="238" rx="30" ry="13" transform="rotate(-18 70 238)"/>
+      <ellipse cx="170" cy="238" rx="30" ry="13" transform="rotate(18 170 238)"/>
+      <ellipse cx="95" cy="246" rx="28" ry="13"/>
+      <ellipse cx="145" cy="246" rx="28" ry="13"/>
+    </g>
+    <g fill="#ffd1e4">
+      <ellipse cx="120" cy="250" rx="30" ry="13"/>
+      <ellipse cx="82" cy="230" rx="22" ry="10" transform="rotate(-10 82 230)"/>
+      <ellipse cx="158" cy="230" rx="22" ry="10" transform="rotate(10 158 230)"/>
+    </g>
+
+    <!-- 上の2本の腕（体の後ろ） -->
+    <g fill="none" stroke-linecap="round">
+      <path d="M94 142 Q50 156 28 124" stroke="#c9578a" stroke-width="17"/>
+      <path d="M94 142 Q50 156 28 124" stroke="#f7a8c8" stroke-width="13"/>
+      <path d="M146 142 Q190 156 212 124" stroke="#c9578a" stroke-width="17"/>
+      <path d="M146 142 Q190 156 212 124" stroke="#f7a8c8" stroke-width="13"/>
+    </g>
+    <!-- 左上の手：蓮の花 -->
+    <circle cx="26" cy="118" r="9" fill="#f7a8c8"/>
+    <rect x="20" y="126" width="12" height="4" rx="2" fill="#f5c518" stroke="#c98a00"/>
+    <g fill="#ff7fb0" stroke="#d9487f">
+      <ellipse cx="26" cy="98" rx="5" ry="11"/>
+      <ellipse cx="17" cy="102" rx="5" ry="10" transform="rotate(-35 17 102)"/>
+      <ellipse cx="35" cy="102" rx="5" ry="10" transform="rotate(35 35 102)"/>
+    </g>
+    <!-- 右上の手：モーダカ（甘いお菓子） -->
+    <circle cx="214" cy="118" r="9" fill="#f7a8c8"/>
+    <rect x="208" y="126" width="12" height="4" rx="2" fill="#f5c518" stroke="#c98a00"/>
+    <path d="M214 90 C206 100 204 108 214 110 C224 108 222 100 214 90 Z" fill="#ffe08a" stroke="#c98a00"/>
+
+    <!-- 胴体とおなか -->
+    <ellipse cx="120" cy="168" rx="42" ry="38" fill="#f7a8c8"/>
+    <ellipse cx="120" cy="176" rx="26" ry="22" fill="#ffc4dc" stroke="none"/>
+    <circle cx="120" cy="180" r="2.5" fill="#c9578a" stroke="none"/>
+
+    <!-- 腰布（ドーティー）と脚 -->
+    <path d="M62 206 Q120 186 178 206 Q186 222 160 226 Q120 232 80 226 Q54 222 62 206 Z" fill="#ffb300" stroke="#d27a00"/>
+    <path d="M70 212 Q120 200 170 212" fill="none" stroke="#d9480f" stroke-width="3"/>
+    <ellipse cx="88" cy="224" rx="14" ry="7" fill="#f7a8c8"/>
+    <ellipse cx="152" cy="224" rx="14" ry="7" fill="#f7a8c8"/>
+
+    <!-- 首飾り -->
+    <path d="M90 140 Q120 166 150 140" fill="none" stroke="#c98a00" stroke-width="6"/>
+    <path d="M90 140 Q120 166 150 140" fill="none" stroke="#f5c518" stroke-width="3"/>
+    <circle cx="120" cy="155" r="5" fill="#e63946" stroke="#c98a00"/>
+
+    <!-- 下の2本の腕（体の前） -->
+    <g fill="none" stroke-linecap="round">
+      <path d="M88 160 Q72 172 62 162" stroke="#c9578a" stroke-width="17"/>
+      <path d="M88 160 Q72 172 62 162" stroke="#f7a8c8" stroke-width="13"/>
+      <path d="M152 160 Q170 178 180 184" stroke="#c9578a" stroke-width="17"/>
+      <path d="M152 160 Q170 178 180 184" stroke="#f7a8c8" stroke-width="13"/>
+    </g>
+    <!-- 左下の手：祝福のてのひら -->
+    <rect x="50" y="136" width="18" height="26" rx="9" fill="#f7a8c8"/>
+    <circle cx="59" cy="150" r="3" fill="#e63946" stroke="none"/>
+    <rect x="52" y="160" width="14" height="4" rx="2" fill="#f5c518" stroke="#c98a00"/>
+    <!-- 右下の手：ラドゥー（お菓子）の器 -->
+    <circle cx="186" cy="186" r="9" fill="#f7a8c8"/>
+    <path d="M168 192 Q186 212 204 192 Z" fill="#f5c518" stroke="#c98a00"/>
+    <g fill="#ff9f1c" stroke="#d27a00">
+      <circle cx="178" cy="188" r="6"/><circle cx="190" cy="187" r="6"/><circle cx="184" cy="180" r="6"/>
+    </g>
+
+    <!-- 耳 -->
+    <path d="M94 76 C60 56 40 92 56 116 C66 130 86 124 96 110 Z" fill="#f28db5"/>
+    <path d="M90 82 C66 70 54 96 64 112 C72 120 84 116 90 106 Z" fill="#ffc4dc" stroke="none"/>
+    <path d="M146 76 C180 56 200 92 184 116 C174 130 154 124 144 110 Z" fill="#f28db5"/>
+    <path d="M150 82 C174 70 186 96 176 112 C168 120 156 116 150 106 Z" fill="#ffc4dc" stroke="none"/>
+
+    <!-- 頭 -->
+    <ellipse cx="120" cy="92" rx="30" ry="30" fill="#f7a8c8"/>
+    <!-- 牙（片方は折れている） -->
+    <path d="M106 110 Q98 120 102 128 Q106 120 112 114 Z" fill="#fffaf0" stroke="#c9b48a"/>
+    <path d="M134 110 Q138 114 137 118 L132 116 Z" fill="#fffaf0" stroke="#c9b48a"/>
+    <!-- 鼻（向かって右へ巻く） -->
+    <path d="M120 100 C116 124 118 142 134 148 C146 152 152 140 144 132" fill="none" stroke="#c9578a" stroke-width="17" stroke-linecap="round"/>
+    <path d="M120 100 C116 124 118 142 134 148 C146 152 152 140 144 132" fill="none" stroke="#f7a8c8" stroke-width="13" stroke-linecap="round"/>
+    <path d="M118 112 h6 M118 122 h6 M120 132 h6" stroke="#e58ab0" stroke-width="2" fill="none"/>
+    <!-- 目 -->
+    <ellipse cx="106" cy="90" rx="4" ry="5" fill="#3a1d2b" stroke="none"/>
+    <ellipse cx="134" cy="90" rx="4" ry="5" fill="#3a1d2b" stroke="none"/>
+    <circle cx="107.5" cy="88" r="1.5" fill="#fff" stroke="none"/>
+    <circle cx="135.5" cy="88" r="1.5" fill="#fff" stroke="none"/>
+    <path d="M100 82 q6 -4 12 0 M128 82 q6 -4 12 0" stroke="#3a1d2b" stroke-width="2" fill="none"/>
+    <!-- 額の印（ティラカ） -->
+    <path d="M110 70 q10 6 20 0" stroke="#ffffff" stroke-width="3" fill="none"/>
+    <ellipse cx="120" cy="74" rx="3" ry="6" fill="#e63946" stroke="none"/>
+
+    <!-- 冠 -->
+    <path d="M94 66 L98 34 L108 46 L120 10 L132 46 L142 34 L146 66 Q120 58 94 66 Z" fill="#f5c518" stroke="#c98a00"/>
+    <path d="M94 66 Q120 58 146 66 L146 72 Q120 64 94 72 Z" fill="#e0a800" stroke="#c98a00"/>
+    <circle cx="120" cy="46" r="6" fill="#e63946" stroke="#c98a00"/>
+    <circle cx="104" cy="56" r="3" fill="#2a9d8f" stroke="none"/>
+    <circle cx="136" cy="56" r="3" fill="#2a9d8f" stroke="none"/>
+    <circle cx="120" cy="10" r="4" fill="#fff3b0" stroke="#c98a00"/>
+  </g>
+</svg>`;
+
   function ganesha(sound) {
     const g = document.createElement('div');
     g.className = 'rare-ganesha';
-    g.innerHTML = '<div class="rg-halo"></div><div class="rg-crown">👑</div><div class="rg-body">🐘</div><div class="rg-lotus">🪷</div>';
+    g.innerHTML = `<div class="rg-halo"></div><div class="rg-body">${GANESHA_SVG}</div>`;
     document.body.appendChild(g);
     if (sound) blessSound();
     setTimeout(() => {
