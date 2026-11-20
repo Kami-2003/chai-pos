@@ -37,7 +37,21 @@ const pad = (n) => String(n).padStart(2, '0');
 const dateKey = (ts) => { const d = new Date(ts); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
 const timeStr = (ts) => { const d = new Date(ts); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const uid = () => Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
-const isRemote = () => !!state.config.gasUrl;
+const isRemote = () => !!state.config.gasUrl && !!state.config.token;
+
+// ---------- ログイン ----------
+// 合言葉そのものはソースに書かず、SHA-256 ハッシュだけを持つ。
+// ログイン時の合言葉は Apps Script の TOKEN としても使うので、
+// スプレッドシート側でも合言葉を知らない人は読み書きできない。
+const PASS_HASH = '4f641df3f8df909e8fad9c84d8187a208dbff276f02fef4657a3b0bd42b76bc3';
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+async function isLoggedIn() {
+  return !!state.config.token && (await sha256(state.config.token)) === PASS_HASH;
+}
 
 function persist() {
   LS.set('pos.config', state.config);
@@ -322,7 +336,6 @@ function exportCsv() {
 function renderSettings() {
   const c = state.config;
   $('#cfgUrl').value = c.gasUrl || '';
-  $('#cfgToken').value = c.token || '';
   $('#cfgRegister').value = c.register || '';
   renderMenuEditor();
 }
@@ -421,7 +434,6 @@ $('#exportCsv').addEventListener('click', exportCsv);
 $('#saveConfig').addEventListener('click', () => {
   const prevRemote = isRemote();
   state.config.gasUrl = $('#cfgUrl').value.trim();
-  state.config.token = $('#cfgToken').value;
   state.config.register = $('#cfgRegister').value.trim() || 'レジ1';
   // ローカルモードで記録した売上を、接続したときにまとめて送る
   if (!prevRemote && isRemote()) {
@@ -436,7 +448,7 @@ $('#testConn').addEventListener('click', async () => {
   if (!url) { $('#connMsg').textContent = 'URLを入力してください'; return; }
   $('#connMsg').textContent = '接続中…';
   const keep = { ...state.config };
-  state.config.gasUrl = url; state.config.token = $('#cfgToken').value;
+  state.config.gasUrl = url;
   try { await api('ping'); $('#connMsg').textContent = '✅ 接続できました。「保存」を押してください。'; }
   catch (e) { $('#connMsg').textContent = '❌ 接続できません: ' + e.message; }
   finally { state.config = keep; }
@@ -460,7 +472,36 @@ $('#saveMenu').addEventListener('click', saveMenu);
 
 window.addEventListener('online', () => sync());
 document.addEventListener('visibilitychange', () => { if (!document.hidden) sync(); });
-setInterval(() => sync(), 20000);
+$('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const pass = $('#loginPass').value;
+  if ((await sha256(pass)) !== PASS_HASH) {
+    $('#loginErr').textContent = '合言葉が違います';
+    $('#loginPass').select();
+    return;
+  }
+  state.config.token = pass;
+  persist();
+  $('#loginPass').value = ''; $('#loginErr').textContent = '';
+  $('#login').hidden = true;
+  start();
+});
+$('#logout').addEventListener('click', () => {
+  if (state.ops.length && !confirm(`未送信の売上が${state.ops.length}件あります。ログアウトしても端末には残りますが、再ログインするまで送信されません。ログアウトしますか？`)) return;
+  if (!state.ops.length && !confirm('ログアウトしますか？')) return;
+  state.config.token = '';
+  persist();
+  location.reload();
+});
 
-renderAll();
-sync();
+let started = false;
+function start() {
+  renderAll();
+  sync();
+  if (!started) { started = true; setInterval(() => sync(), 20000); }
+}
+
+(async () => {
+  if (await isLoggedIn()) start();
+  else { $('#login').hidden = false; $('#loginPass').focus(); }
+})();

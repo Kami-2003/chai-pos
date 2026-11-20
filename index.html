@@ -8,6 +8,17 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="login" id="login" hidden>
+    <form class="login-box" id="loginForm">
+      <div class="login-title">☕ チャイ レジ</div>
+      <label>合言葉
+        <input type="password" id="loginPass" autocomplete="current-password" autofocus>
+      </label>
+      <div class="login-err" id="loginErr"></div>
+      <button class="btn primary" type="submit">ログイン</button>
+    </form>
+  </div>
+
   <header class="topbar">
     <div class="brand">☕ チャイ レジ</div>
     <div class="reg-name" id="regName"></div>
@@ -71,9 +82,6 @@
       <label>Apps Script ウェブアプリURL
         <input type="url" id="cfgUrl" placeholder="https://script.google.com/macros/s/.../exec">
       </label>
-      <label>合言葉（Code.gs の TOKEN と同じもの）
-        <input type="password" id="cfgToken" autocomplete="off">
-      </label>
       <label>この端末のレジ名
         <input type="text" id="cfgRegister" placeholder="レジ1">
       </label>
@@ -81,6 +89,7 @@
         <button class="btn primary small" id="saveConfig">保存</button>
         <button class="btn small" id="testConn">接続テスト</button>
         <button class="btn small" id="reload">再読み込み</button>
+        <button class="btn small danger" id="logout">ログアウト</button>
       </div>
       <p class="note" id="connMsg">URL未設定の間は、この端末内だけに保存する「ローカルモード」で動きます。</p>
     </section>
