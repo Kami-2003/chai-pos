@@ -196,11 +196,20 @@ function checkout() {
     total, method: '現金', received: total, change: 0,
     status: '有効',
   };
+  // 今日の杯数（全レジ合計）。50杯ごとに特大演出
+  const today = dateKey(sale.ts);
+  const before = state.sales
+    .filter((s) => s.status !== '取消' && dateKey(s.ts) === today)
+    .reduce((a, s) => a + saleCups(s), 0);
+  const after = before + sale.cups;
+  const STEP = 50;
+  const milestone = Math.floor(after / STEP) > Math.floor(before / STEP) ? Math.floor(after / STEP) * STEP : 0;
+
   state.sales.push(sale);
   if (isRemote()) state.ops.push({ type: 'add', sale });
   persist();
 
-  toast(`記録しました：${sale.cups}杯 ${yen(total)}`);
+  FX.celebrate({ cups: sale.cups, total, todayCups: after, milestone, from: $('#confirm'), sound: state.config.sound !== false });
 
   resetCart();
   renderAll();
@@ -361,6 +370,7 @@ function renderSettings() {
   const c = state.config;
   $('#cfgUrl').value = c.gasUrl || '';
   $('#cfgRegister').value = c.register || '';
+  $('#cfgSound').checked = c.sound !== false;
   renderMenuEditor();
 }
 
@@ -459,6 +469,7 @@ $('#saveConfig').addEventListener('click', () => {
   const prevRemote = isRemote();
   state.config.gasUrl = $('#cfgUrl').value.trim();
   state.config.register = $('#cfgRegister').value.trim() || 'レジ1';
+  state.config.sound = $('#cfgSound').checked;
   // ローカルモードで記録した売上を、接続したときにまとめて送る
   if (!prevRemote && isRemote()) {
     const queued = pendingIds();

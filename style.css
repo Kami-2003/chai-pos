@@ -194,6 +194,44 @@ h3 { margin: 22px 0 8px; font-size: 16px; }
 .login-box input { padding: 12px; border: 1px solid var(--line); border-radius: 10px; font-size: 18px; }
 .login-err { color: var(--warn); font-size: 13px; min-height: 1em; }
 
+/* ---------- 記録演出 ---------- */
+#fx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 80; }
+.pop {
+  position: fixed; left: 50%; top: 38%; z-index: 81; pointer-events: none;
+  transform: translate(-50%, -50%) scale(.3); opacity: 0; text-align: center; white-space: nowrap;
+}
+.pop.show { animation: pop-in 1.3s cubic-bezier(.2, 1.6, .4, 1) forwards; }
+.pop.big.show { animation-duration: 2.6s; }
+.pop-main {
+  font-size: 64px; font-weight: 900; color: #fff; letter-spacing: .02em;
+  -webkit-text-stroke: 3px var(--brand); paint-order: stroke fill;
+  text-shadow: 0 6px 0 var(--accent), 0 10px 24px rgba(0,0,0,.25);
+}
+.pop.big .pop-main { font-size: 44px; }
+.pop-sub {
+  display: inline-block; margin-top: 6px; padding: 6px 14px; border-radius: 999px;
+  background: var(--brand); color: #fff; font-weight: 700; font-size: 16px;
+}
+@keyframes pop-in {
+  0%   { opacity: 0; transform: translate(-50%, -30%) scale(.3) rotate(-8deg); }
+  18%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15) rotate(3deg); }
+  30%  { transform: translate(-50%, -50%) scale(1) rotate(0); }
+  80%  { opacity: 1; transform: translate(-50%, -55%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -75%) scale(.9); }
+}
+.btn.boom { animation: boom .35s ease-out; }
+@keyframes boom {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(233,162,59,.8); }
+  40% { transform: scale(.94); }
+  100% { transform: scale(1); box-shadow: 0 0 0 18px rgba(233,162,59,0); }
+}
+.total.bump { animation: bump .4s ease-out; }
+@keyframes bump { 40% { transform: scale(1.12); color: var(--accent); } }
+@media (prefers-reduced-motion: reduce) {
+  .pop.show { animation-duration: .01s; opacity: 1; transform: translate(-50%, -50%); }
+}
+@media (max-width: 560px) { .pop-main { font-size: 52px; } .pop.big .pop-main { font-size: 32px; } }
+
 /* ---------- toast ---------- */
 .overlay {
   position: fixed; inset: 0; background: rgba(40,20,10,.6); display: grid; place-items: center; z-index: 50;
