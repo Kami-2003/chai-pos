@@ -232,6 +232,72 @@ h3 { margin: 22px 0 8px; font-size: 16px; }
 }
 @media (max-width: 560px) { .pop-main { font-size: 52px; } .pop.big .pop-main { font-size: 32px; } }
 
+/* ---------- 激レア演出 ---------- */
+.rare-banner {
+  position: fixed; left: 50%; top: 64%; z-index: 84; pointer-events: none; white-space: nowrap;
+  padding: 10px 22px; border-radius: 999px; font-weight: 900; font-size: 20px; color: #fff;
+  transform: translateX(-50%); animation: banner 3.2s ease-out forwards;
+  box-shadow: 0 6px 20px rgba(0,0,0,.25);
+}
+.rare-banner.horse { background: linear-gradient(90deg, #6b3a1e, #b8732e); }
+.rare-banner.ganesha { background: linear-gradient(90deg, #d4890a, #f5c518, #d4890a); color: #5a2d00; }
+@keyframes banner {
+  0% { opacity: 0; transform: translateX(-50%) scale(.6); }
+  10% { opacity: 1; transform: translateX(-50%) scale(1.08); }
+  16% { transform: translateX(-50%) scale(1); }
+  85% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+}
+
+/* 馬：右から左へ駆け抜ける */
+.rare-horse {
+  position: fixed; left: 100vw; top: 52%; z-index: 83; pointer-events: none;
+  font-size: 140px; line-height: 1; animation: horse-run 2.2s linear forwards;
+}
+.rh-body { display: inline-block; animation: gallop .27s ease-in-out infinite alternate; }
+@keyframes horse-run { to { transform: translateX(calc(-100vw - 220px)); } }
+@keyframes gallop {
+  from { transform: translateY(0) rotate(4deg); }
+  to   { transform: translateY(-34px) rotate(-6deg); }
+}
+.rh-dust {
+  position: fixed; z-index: 82; pointer-events: none; font-size: 40px;
+  animation: dust .7s ease-out forwards;
+}
+@keyframes dust { to { opacity: 0; transform: translate(40px, -10px) scale(1.8); } }
+
+/* ガネーシャ：右上から飛んできて、浮かんで、上へ去る */
+.rare-ganesha {
+  position: fixed; left: 50%; top: 26%; z-index: 83; pointer-events: none;
+  width: 220px; height: 260px; margin: -130px 0 0 -110px;
+  display: grid; place-items: center; animation: ganesha-fly 3.3s cubic-bezier(.3,.8,.3,1) forwards;
+}
+.rare-ganesha > * { grid-area: 1 / 1; }
+.rg-halo {
+  width: 240px; height: 240px; border-radius: 50%;
+  background:
+    radial-gradient(circle, rgba(255,240,170,.95) 0 30%, rgba(255,200,60,.55) 45%, rgba(255,200,60,0) 70%),
+    repeating-conic-gradient(rgba(255,215,80,.55) 0 8deg, transparent 8deg 20deg);
+  animation: halo 3s linear infinite;
+}
+.rg-body { font-size: 130px; line-height: 1; filter: drop-shadow(0 0 18px #ffd54a); animation: float 1s ease-in-out infinite alternate; }
+.rg-crown { font-size: 54px; align-self: start; margin-top: 4px; animation: float 1s ease-in-out infinite alternate; }
+.rg-lotus { font-size: 56px; align-self: end; }
+@keyframes halo { to { transform: rotate(360deg); } }
+@keyframes float { to { transform: translateY(-10px); } }
+@keyframes ganesha-fly {
+  0%   { opacity: 0; transform: translate(60vw, -50vh) scale(.3) rotate(25deg); }
+  22%  { opacity: 1; transform: translate(0, 0) scale(1.1) rotate(-4deg); }
+  30%  { transform: translate(0, 0) scale(1) rotate(0); }
+  78%  { opacity: 1; transform: translate(0, -10px) scale(1); }
+  100% { opacity: 0; transform: translate(-40vw, -70vh) scale(.5) rotate(-20deg); }
+}
+@media (max-width: 560px) {
+  .rare-horse { font-size: 100px; }
+  .rare-ganesha { transform-origin: center; scale: .75; }
+  .rare-banner { font-size: 16px; }
+}
+
 /* ---------- toast ---------- */
 .overlay {
   position: fixed; inset: 0; background: rgba(40,20,10,.6); display: grid; place-items: center; z-index: 50;

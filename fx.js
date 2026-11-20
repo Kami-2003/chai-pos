@@ -21,7 +21,7 @@ const FX = (() => {
   }
   addEventListener('resize', resize); resize();
 
-  function burst(x, y, n, spread = 1) {
+  function burst(x, y, n, spread = 1, palette = COLORS, cups = true) {
     for (let i = 0; i < n; i++) {
       const a = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * spread;
       const v = 7 + Math.random() * 9;
@@ -29,9 +29,9 @@ const FX = (() => {
         x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v,
         w: 6 + Math.random() * 6, h: 8 + Math.random() * 8,
         r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.4,
-        c: COLORS[(Math.random() * COLORS.length) | 0],
+        c: palette[(Math.random() * palette.length) | 0],
         life: 0, max: 70 + Math.random() * 50,
-        cup: Math.random() < 0.08,          // たまに ☕ が飛ぶ
+        cup: cups && Math.random() < 0.08,  // たまに ☕ が飛ぶ
       });
     }
     if (!running) { running = true; requestAnimationFrame(tick); }
@@ -101,6 +101,83 @@ const FX = (() => {
     } catch { /* 音が出せない環境は無視 */ }
   }
 
+  // ---------- 激レア演出 ----------
+  const GOLD = ['#ffd54a', '#ffb300', '#fff3b0', '#ffffff', '#f6a623'];
+
+  function banner(text, cls) {
+    const b = document.createElement('div');
+    b.className = 'rare-banner ' + cls;
+    b.textContent = text;
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 3200);
+  }
+
+  // パカラッパカラッ（ノイズを短く鳴らす）
+  function gallopSound() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      const len = audio.sampleRate * 0.04;
+      const buf = audio.createBuffer(1, len, audio.sampleRate);
+      const d = buf.getChannelData(0);
+      for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4);
+      const t = audio.currentTime;
+      for (let k = 0; k < 8; k++) {
+        [0, 0.09, 0.15].forEach((off, j) => {
+          const s = audio.createBufferSource(), f = audio.createBiquadFilter(), g = audio.createGain();
+          s.buffer = buf; f.type = 'bandpass'; f.frequency.value = j === 1 ? 900 : 650; f.Q.value = 1.5;
+          g.gain.value = 0.5;
+          s.connect(f).connect(g).connect(audio.destination);
+          s.start(t + k * 0.27 + off);
+        });
+      }
+    } catch { }
+  }
+
+  // ゴーン…＋きらきら
+  function blessSound() {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+      if (audio.state === 'suspended') audio.resume();
+      const t = audio.currentTime;
+      [196, 392, 588, 784].forEach((f, i) => tone(t, f, 2.2 - i * 0.3, 0.12 / (i + 1)));
+      [1568, 2093, 2637, 3136, 2637, 3136].forEach((f, i) => tone(t + 0.4 + i * 0.07, f, 0.4, 0.06));
+    } catch { }
+  }
+
+  function horse(sound) {
+    const h = document.createElement('div');
+    h.className = 'rare-horse';
+    // 🐎 は主要な端末で左向きなので、右から左へ走らせる
+    h.innerHTML = '<span class="rh-body">🐎</span>';
+    document.body.appendChild(h);
+    banner('🐎 激レア！ 馬が駆け抜けた！', 'horse');
+    if (sound) gallopSound();
+    // 砂ぼこり
+    const dust = setInterval(() => {
+      const r = h.getBoundingClientRect();
+      const p = document.createElement('span');
+      p.className = 'rh-dust'; p.textContent = '💨';
+      p.style.left = (r.right - 30) + 'px'; p.style.top = (r.bottom - 50) + 'px';
+      document.body.appendChild(p);
+      setTimeout(() => p.remove(), 700);
+    }, 90);
+    setTimeout(() => { clearInterval(dust); h.remove(); }, 2300);
+  }
+
+  function ganesha(sound) {
+    const g = document.createElement('div');
+    g.className = 'rare-ganesha';
+    g.innerHTML = '<div class="rg-halo"></div><div class="rg-crown">👑</div><div class="rg-body">🐘</div><div class="rg-lotus">🪷</div>';
+    document.body.appendChild(g);
+    if (sound) blessSound();
+    setTimeout(() => {
+      banner('🙏 ガネーシャ降臨！ 商売繁盛！', 'ganesha');
+      if (!reduceMotion()) burst(innerWidth / 2, innerHeight * 0.3, 140, 2, GOLD, false);
+    }, 700);
+    setTimeout(() => g.remove(), 3300);
+  }
+
   // ---------- 公開関数 ----------
   /**
    * @param {object} o  { cups, total, todayCups, milestone, from: HTMLElement, sound }
@@ -121,7 +198,13 @@ const FX = (() => {
     try { navigator.vibrate && navigator.vibrate(o.milestone ? [40, 60, 40, 60, 120] : [25, 40, 25]); } catch { }
 
     if (o.from) { o.from.classList.remove('boom'); void o.from.offsetWidth; o.from.classList.add('boom'); }
+
+    // 5% で馬、別の 5% でガネーシャ（同時には出ない）
+    const roll = Math.random();
+    if (roll < 0.05) setTimeout(() => horse(o.sound), 250);
+    else if (roll < 0.10) setTimeout(() => ganesha(o.sound), 250);
   }
 
-  return { celebrate };
+  // horse / ganesha はコンソールから FX.horse() のように試せる
+  return { celebrate, horse: () => horse(true), ganesha: () => ganesha(true) };
 })();
