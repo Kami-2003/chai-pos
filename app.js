@@ -210,13 +210,22 @@ function checkout() {
 // =========================================================
 // 履歴
 // =========================================================
+// 一橋祭の開催日（売上がなくても常に選べる）
+const FESTIVAL_DAYS = ['2026-11-21', '2026-11-22', '2026-11-23'];
+const WEEK = ['日', '月', '火', '水', '木', '金', '土'];
+function dayLabel(k) {
+  const [y, m, d] = k.split('-').map(Number);
+  const w = WEEK[new Date(y, m - 1, d).getDay()];
+  const n = FESTIVAL_DAYS.indexOf(k);
+  return `${m}/${d}（${w}）${n >= 0 ? ` ${n + 1}日目` : ''}`;
+}
+
 function dateOptions(sel, withAll) {
-  const keys = [...new Set(state.sales.map((s) => dateKey(s.ts)))].sort().reverse();
   const today = dateKey(Date.now());
-  if (!keys.includes(today)) keys.unshift(today);
+  const keys = [...new Set([...FESTIVAL_DAYS, today, ...state.sales.map((s) => dateKey(s.ts))])].sort();
   const cur = sel.value;
   sel.innerHTML = (withAll ? '<option value="all">全期間</option>' : '') +
-    keys.map((k) => `<option value="${k}">${k}${k === today ? '（今日）' : ''}</option>`).join('');
+    keys.map((k) => `<option value="${k}">${dayLabel(k)}${k === today ? '・今日' : ''}</option>`).join('');
   sel.value = cur && [...sel.options].some((o) => o.value === cur) ? cur : today;
 }
 
@@ -273,6 +282,21 @@ function renderSummary() {
     ['1杯あたり', cups ? yen(sum(list) / cups) : '—'],
     ['取消', voids + ' 件'],
   ].map(([k, v]) => `<div class="card"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+
+  // 日別（選択に関係なく、開催3日間＋売上のある日をすべて表示）
+  const valid = state.sales.filter((s) => s.status !== '取消');
+  const dayKeys = [...new Set([...FESTIVAL_DAYS, ...valid.map((s) => dateKey(s.ts))])].sort();
+  const dayRows = dayKeys.map((k) => {
+    const ds = valid.filter((s) => dateKey(s.ts) === k);
+    return { k, n: ds.length, cups: ds.reduce((a, s) => a + saleCups(s), 0), amt: sum(ds) };
+  });
+  const tot = dayRows.reduce((a, r) => ({ n: a.n + r.n, cups: a.cups + r.cups, amt: a.amt + r.amt }), { n: 0, cups: 0, amt: 0 });
+  const maxD = Math.max(1, ...dayRows.map((r) => r.cups));
+  const sel = $('#summaryDate').value;
+  $('#dayTable').innerHTML = '<tr><th>日付</th><th class="num">件数</th><th class="num">杯数</th><th class="num">売上</th><th style="width:25%"></th></tr>' +
+    dayRows.map((r) => `<tr${r.k === sel ? ' style="background:#fdf3e6"' : ''}><td>${dayLabel(r.k)}</td><td class="num">${r.n}</td><td class="num">${r.cups}</td><td class="num">${yen(r.amt)}</td>
+      <td><div class="bar" style="width:${(r.cups / maxD) * 100}%"></div></td></tr>`).join('') +
+    `<tr><th>合計</th><th class="num">${tot.n}</th><th class="num">${tot.cups}</th><th class="num">${yen(tot.amt)}</th><th></th></tr>`;
 
   // 商品別
   const byItem = new Map();
